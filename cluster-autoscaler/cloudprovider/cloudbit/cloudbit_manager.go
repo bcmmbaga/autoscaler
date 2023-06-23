@@ -96,8 +96,6 @@ func newManager(configReader io.Reader, discoveryOpts cloudprovider.NodeGroupDis
 	opts = append(opts, goclient.WithToken(cfg.Token))
 
 	doClient := goclient.NewClient(opts...)
-	kubernetes.NewNodeService(doClient, cfg.ClusterID)
-
 	m := &Manager{
 		client:        kubernetes.NewNodeService(doClient, cfg.ClusterID),
 		clusterID:     cfg.ClusterID,
@@ -112,19 +110,9 @@ func newManager(configReader io.Reader, discoveryOpts cloudprovider.NodeGroupDis
 // based on the `--scan-interval`. By default it's 10 seconds.
 func (m *Manager) Refresh() error {
 	var (
-		minSize           int
-		maxSize           int
-		workerConfigFound = false
-		poolConfigFound   = false
-		poolGroups        []*NodeGroup
-		workerGroups      []*NodeGroup
+		minSize int
+		maxSize int
 	)
-
-	ctx := context.Background()
-	pools, err := m.client.List(ctx, goclient.Cursor{NoFilter: 1})
-	if err != nil {
-		return fmt.Errorf("couldn't list Kubernetes cluster pools: %s", err)
-	}
 
 	klog.V(4).Infof("refreshing workers node group kubernetes cluster: %q", m.clusterID)
 
@@ -137,67 +125,31 @@ func (m *Manager) Refresh() error {
 		if spec.Name == "workers" {
 			minSize = spec.MinSize
 			maxSize = spec.MaxSize
-			workerConfigFound = true
+
 			klog.V(4).Infof("found configuration for workers node group: min: %d max: %d", minSize, maxSize)
-		} else {
-			poolConfigFound = true
-			pool := m.getNodeGroupConfig(spec, pools.Items)
-			if pool != nil {
-				poolGroups = append(poolGroups, pool)
-			}
-			klog.V(4).Infof("found configuration for pool node group: min: %d max: %d", minSize, maxSize)
 		}
 	}
 
-	if poolConfigFound {
-		m.nodeGroups = poolGroups
-	} else if workerConfigFound {
-		for _, nodePool := range pools.Items {
-			np := nodePool
-			klog.V(4).Infof("adding node pool: %q", nodePool.ID)
-
-			workerGroups = append(workerGroups, &NodeGroup{
-				id:        nodePool.ID,
-				clusterID: m.clusterID,
-				client:    m.client,
-				nodePool:  &np,
-				minSize:   minSize,
-				maxSize:   maxSize,
-			})
-		}
-		m.nodeGroups = workerGroups
-	} else {
-		return fmt.Errorf("no workers node group configuration found")
+	ctx := context.Background()
+	nodeList, err := m.client.List(ctx, goclient.Cursor{NoFilter: 1})
+	if err != nil {
+		return fmt.Errorf("couldn't list Kubernetes cluster pools: %s", err)
 	}
 
-	// If both config found, pool config get precedence
-	if poolConfigFound && workerConfigFound {
-		m.nodeGroups = poolGroups
-	}
+	var group []*NodeGroup
+	group = append(group, &NodeGroup{
+		id:        1,
+		clusterID: m.clusterID,
+		client:    m.client,
+		nodes:     nodeList.Items,
+		minSize:   minSize,
+		maxSize:   maxSize,
+	})
 
-	if len(m.nodeGroups) == 0 {
+	if len(group) == 0 {
 		klog.V(4).Info("cluster-autoscaler is disabled. no node pools are configured")
 	}
 
-	return nil
-}
-
-// getNodeGroupConfig get the node group configuration from the cluster pool configuration
-func (m *Manager) getNodeGroupConfig(spec *dynamic.NodeGroupSpec, pools []kubernetes.Node) *NodeGroup {
-	for _, nodePool := range pools {
-		if spec.Name == nodePool.Name {
-			np := nodePool
-			klog.V(4).Infof("adding node pool: %q min: %d max: %d", nodePool.ID, spec.MinSize, spec.MaxSize)
-
-			return &NodeGroup{
-				id:        nodePool.ID,
-				clusterID: m.clusterID,
-				client:    m.client,
-				nodePool:  &np,
-				minSize:   spec.MinSize,
-				maxSize:   spec.MaxSize,
-			}
-		}
-	}
+	m.nodeGroups = group
 	return nil
 }
