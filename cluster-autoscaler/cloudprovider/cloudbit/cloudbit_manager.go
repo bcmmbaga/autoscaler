@@ -61,7 +61,7 @@ type Config struct {
 
 	// Token is the User's Access Token associated with the cluster where
 	// Cloudbit Cluster Autoscaler is running.
-	Token string `json:"token"`
+	ApiToken string `json:"api_token"`
 
 	// URL points to Cloudbit API. If empty, defaults to
 	// https://api.cloudbit.ch/
@@ -81,11 +81,11 @@ func newManager(configReader io.Reader, discoveryOpts cloudprovider.NodeGroupDis
 		}
 	}
 
-	if cfg.Token == "" {
-		return nil, errors.New("access token is not provided")
+	if cfg.ApiToken == "" {
+		return nil, errors.New("cloudbit access token is not provided")
 	}
 	if cfg.ClusterID == 0 {
-		return nil, errors.New("cluster ID is not provided")
+		return nil, errors.New("cloudbit cluster ID is not provided")
 	}
 
 	opts := []goclient.Option{}
@@ -93,7 +93,7 @@ func newManager(configReader io.Reader, discoveryOpts cloudprovider.NodeGroupDis
 		opts = append(opts, goclient.WithBase(cfg.ApiURL))
 	}
 	opts = append(opts, goclient.WithUserAgent("cluster-autoscaler-cloudbit/"+version))
-	opts = append(opts, goclient.WithToken(cfg.Token))
+	opts = append(opts, goclient.WithToken(cfg.ApiToken))
 
 	doClient := goclient.NewClient(opts...)
 	m := &Manager{
