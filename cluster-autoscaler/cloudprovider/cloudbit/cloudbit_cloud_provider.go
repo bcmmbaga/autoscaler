@@ -58,7 +58,7 @@ func newCloudbitCloudProvider(manager *Manager, rl *cloudprovider.ResourceLimite
 
 // Name returns name of the cloud provider.
 func (d *cloudbitCloudProvider) Name() string {
-	return cloudprovider.DigitalOceanProviderName
+	return cloudprovider.CloudbitProviderName
 }
 
 // NodeGroups returns all node groups configured for this cloud provider.
@@ -74,6 +74,28 @@ func (d *cloudbitCloudProvider) NodeGroups() []cloudprovider.NodeGroup {
 // should not be processed by cluster autoscaler, or non-nil error if such
 // occurred. Must be implemented.
 func (d *cloudbitCloudProvider) NodeGroupForNode(node *apiv1.Node) (cloudprovider.NodeGroup, error) {
+	providerID := node.Spec.ProviderID
+	nodeID := toNodeID(providerID)
+
+	klog.V(5).Infof("checking nodegroup for node ID: %q", nodeID)
+
+	for _, group := range d.manager.nodeGroups {
+		klog.V(5).Infof("iterating over node group %q", group.Id())
+		nodes, err := group.Nodes()
+		if err != nil {
+			return nil, err
+		}
+
+		for _, node := range nodes {
+			klog.V(6).Infof("checking node has: %q want: %q", node.Id, providerID)
+			if node.Id != providerID {
+				continue
+			}
+
+			return group, nil
+		}
+	}
+
 	return nil, nil
 }
 
