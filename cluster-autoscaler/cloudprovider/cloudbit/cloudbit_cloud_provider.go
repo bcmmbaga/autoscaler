@@ -27,6 +27,7 @@ import (
 	"k8s.io/autoscaler/cluster-autoscaler/utils/gpu"
 	"k8s.io/klog/v2"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -75,7 +76,11 @@ func (d *cloudbitCloudProvider) NodeGroups() []cloudprovider.NodeGroup {
 // occurred. Must be implemented.
 func (d *cloudbitCloudProvider) NodeGroupForNode(node *apiv1.Node) (cloudprovider.NodeGroup, error) {
 	providerID := node.Spec.ProviderID
-	nodeID := toNodeID(providerID)
+
+	nodeID, err := toNodeID(providerID)
+	if err != nil {
+		return nil, err
+	}
 
 	klog.V(5).Infof("checking nodegroup for node ID: %q", nodeID)
 
@@ -205,7 +210,12 @@ func toProviderID(nodeID int) string {
 	return fmt.Sprintf("%s%d", doProviderIDPrefix, nodeID)
 }
 
-// toNodeID returns a node or droplet ID from the given provider ID.
-func toNodeID(providerID string) string {
-	return strings.TrimPrefix(providerID, doProviderIDPrefix)
+// toNodeID returns a node or instance ID from the given provider ID.
+func toNodeID(providerID string) (int, error) {
+	instanceID, err := strconv.Atoi(strings.TrimPrefix(providerID, doProviderIDPrefix))
+	if err != nil {
+		return 0, err
+	}
+
+	return instanceID, nil
 }
