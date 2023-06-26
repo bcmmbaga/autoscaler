@@ -14,6 +14,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.241
 	github.com/cenkalti/backoff/v4 v4.2.0
 	github.com/digitalocean/godo v1.27.0
+	github.com/flowswiss/goclient v0.2.6
 	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/mock v1.6.0
