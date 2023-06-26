@@ -25,23 +25,20 @@ import (
 	"github.com/flowswiss/goclient/kubernetes"
 	"io"
 	"k8s.io/autoscaler/cluster-autoscaler/cloudprovider"
+	gocloudbit "k8s.io/autoscaler/cluster-autoscaler/cloudprovider/cloudbit/cloudbit-sdk-go"
 	"k8s.io/autoscaler/cluster-autoscaler/config/dynamic"
 	"k8s.io/klog/v2"
 )
 
-var (
-	version = "dev"
-)
-
 type nodeGroupClient interface {
-	// List lists all the node pools found in a Kubernetes cluster.
-	List(ctx context.Context, cursor goclient.Cursor) (kubernetes.NodeList, error)
+	// ListClusterNodes lists all the node found in a Kubernetes cluster.
+	ListClusterNodes(ctx context.Context, cursor goclient.Cursor) (kubernetes.NodeList, error)
 
-	// PerformAction updates the details of an existing node pool.
-	PerformAction(ctx context.Context, nodeID int, req kubernetes.NodePerformAction) (kubernetes.Node, error)
+	// UpdateCluster updates the details of an existing kubernetes cluster.
+	UpdateCluster(ctx context.Context, clusterID int, body kubernetes.ClusterUpdateFlavor) (cluster kubernetes.Cluster, err error)
 
-	// Delete deletes a specific node in a node pool.
-	Delete(ctx context.Context, nodeID int) error
+	// DeleteClusterNode deletes a specific node in a kubernetes cluster.
+	DeleteClusterNode(ctx context.Context, nodeID int) error
 }
 
 // Manager handles Cloudbit communication and data caching of
@@ -88,16 +85,8 @@ func newManager(configReader io.Reader, discoveryOpts cloudprovider.NodeGroupDis
 		return nil, errors.New("cloudbit cluster ID is not provided")
 	}
 
-	opts := []goclient.Option{}
-	if cfg.ApiURL != "" {
-		opts = append(opts, goclient.WithBase(cfg.ApiURL))
-	}
-	opts = append(opts, goclient.WithUserAgent("cluster-autoscaler-cloudbit/"+version))
-	opts = append(opts, goclient.WithToken(cfg.ApiToken))
-
-	doClient := goclient.NewClient(opts...)
 	m := &Manager{
-		client:        kubernetes.NewNodeService(doClient, cfg.ClusterID),
+		client:        gocloudbit.NewClient(cfg.ClusterID, cfg.ApiToken, cfg.ApiURL),
 		clusterID:     cfg.ClusterID,
 		nodeGroups:    make([]*NodeGroup, 0),
 		discoveryOpts: discoveryOpts,
@@ -131,7 +120,7 @@ func (m *Manager) Refresh() error {
 	}
 
 	ctx := context.Background()
-	nodeList, err := m.client.List(ctx, goclient.Cursor{NoFilter: 1})
+	nodeList, err := m.client.ListClusterNodes(ctx, goclient.Cursor{NoFilter: 1})
 	if err != nil {
 		return fmt.Errorf("couldn't list Kubernetes cluster pools: %s", err)
 	}
