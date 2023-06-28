@@ -80,7 +80,7 @@ func (n *NodeGroup) IncreaseSize(delta int) error {
 
 	req := kubernetes.ClusterUpdateFlavor{
 		Worker: kubernetes.ClusterWorkerUpdate{
-			ProductID: 0,
+			ProductID: n.nodeProductID(),
 			Count:     targetSize,
 		},
 	}
@@ -143,7 +143,7 @@ func (n *NodeGroup) DecreaseTargetSize(delta int) error {
 
 	req := kubernetes.ClusterUpdateFlavor{
 		Worker: kubernetes.ClusterWorkerUpdate{
-			ProductID: 0,
+			ProductID: n.nodeProductID(),
 			Count:     targetSize,
 		},
 	}
@@ -220,6 +220,14 @@ func (n *NodeGroup) Autoprovisioned() bool {
 	return false
 }
 
+// nodeProductID returns the cloudbit product id from existing worker node.
+func (n *NodeGroup) nodeProductID() int {
+	if totalNodes := len(n.nodes); totalNodes > 0 {
+		return n.nodes[totalNodes-1].Product.ID
+	}
+	return 0
+}
+
 // toInstances converts a slice of []*kubernetes.Node to
 // cloudprovider.Instance
 func toInstances(nodes []kubernetes.Node) []cloudprovider.Instance {
@@ -248,9 +256,9 @@ func toInstanceStatus(nodeState *kubernetes.NodeStatus) *cloudprovider.InstanceS
 
 	st := &cloudprovider.InstanceStatus{}
 	switch nodeState.Key {
-	case "provisioning":
+	case "creating":
 		st.State = cloudprovider.InstanceCreating
-	case "running":
+	case "healthy":
 		st.State = cloudprovider.InstanceRunning
 	case "draining", "deleting":
 		st.State = cloudprovider.InstanceDeleting

@@ -53,7 +53,7 @@ func TestNodeGroup_IncreaseSize(t *testing.T) {
 			ng.clusterID,
 			kubernetes.ClusterUpdateFlavor{
 				Worker: kubernetes.ClusterWorkerUpdate{
-					ProductID: 1,
+					ProductID: 0,
 					Count:     newCount,
 				},
 			},
@@ -101,7 +101,7 @@ func TestNodeGroup_IncreaseSize(t *testing.T) {
 			ng.clusterID,
 			kubernetes.ClusterUpdateFlavor{
 				Worker: kubernetes.ClusterWorkerUpdate{
-					ProductID: 1,
+					ProductID: 0,
 					Count:     newCount,
 				},
 			},
@@ -184,7 +184,7 @@ func TestNodeGroup_DecreaseTargetSize(t *testing.T) {
 			ng.clusterID,
 			kubernetes.ClusterUpdateFlavor{
 				Worker: kubernetes.ClusterWorkerUpdate{
-					ProductID: 1,
+					ProductID: 0,
 					Count:     newCount,
 				},
 			},
