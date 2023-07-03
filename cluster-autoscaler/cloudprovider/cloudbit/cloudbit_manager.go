@@ -28,6 +28,8 @@ import (
 	gocloudbit "k8s.io/autoscaler/cluster-autoscaler/cloudprovider/cloudbit/cloudbit-sdk-go"
 	"k8s.io/autoscaler/cluster-autoscaler/config/dynamic"
 	"k8s.io/klog/v2"
+	"os"
+	"strconv"
 )
 
 type nodeGroupClient interface {
@@ -54,15 +56,15 @@ type Manager struct {
 type Config struct {
 	// ClusterID is the id associated with the cluster where Cloudbit
 	// Cluster Autoscaler is running.
-	ClusterID int `json:"cluster_id"`
+	ClusterID int `json:"cluster_id" yaml:"cluster_id"`
 
 	// Token is the User's Access Token associated with the cluster where
 	// Cloudbit Cluster Autoscaler is running.
-	ApiToken string `json:"api_token"`
+	ApiToken string `json:"api_token" yaml:"api_token"`
 
 	// URL points to Cloudbit API. If empty, defaults to
 	// https://api.cloudbit.ch/
-	ApiURL string `json:"api_url"`
+	ApiURL string `json:"api_url" yaml:"api_url"`
 }
 
 func newManager(configReader io.Reader, discoveryOpts cloudprovider.NodeGroupDiscoveryOptions) (*Manager, error) {
@@ -76,6 +78,15 @@ func newManager(configReader io.Reader, discoveryOpts cloudprovider.NodeGroupDis
 		if err != nil {
 			return nil, err
 		}
+	} else {
+		cfg.ApiURL = os.Getenv("CLOUDBIT_API_URL")
+		cfg.ApiToken = os.Getenv("CLOUDBIT_API_TOKEN")
+
+		clusterID, err := strconv.Atoi(os.Getenv("CLOUDBIT_CLUSTER_ID"))
+		if err != nil {
+			return nil, err
+		}
+		cfg.ClusterID = clusterID
 	}
 
 	if cfg.ApiToken == "" {
