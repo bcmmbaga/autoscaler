@@ -19,13 +19,12 @@ package cloudbit
 import (
 	"bytes"
 	"context"
-	"github.com/flowswiss/goclient"
-	"github.com/flowswiss/goclient/kubernetes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/autoscaler/cluster-autoscaler/cloudprovider"
+	"k8s.io/autoscaler/cluster-autoscaler/cloudprovider/cloudbit/cloudbit-sdk-go/kubernetes"
 	"testing"
 )
 
@@ -33,7 +32,7 @@ type cloudbitClientMock struct {
 	mock.Mock
 }
 
-func (c *cloudbitClientMock) ListClusterNodes(ctx context.Context, cursor goclient.Cursor) (kubernetes.NodeList, error) {
+func (c *cloudbitClientMock) ListClusterNodes(ctx context.Context, cursor cloudbitgo.Cursor) (kubernetes.NodeList, error) {
 	args := c.Called(ctx, cursor)
 	return args.Get(0).(kubernetes.NodeList), args.Error(1)
 }
@@ -64,7 +63,7 @@ func testCloudProvider(t *testing.T, client *cloudbitClientMock) *cloudbitCloudP
 
 		client.On("ListClusterNodes",
 			context.Background(),
-			goclient.Cursor{NoFilter: 1},
+			cloudbitgo.Cursor{NoFilter: 1},
 		).Return(
 			kubernetes.NodeList{
 				Items: []kubernetes.Node{
@@ -147,7 +146,7 @@ func TestCloudbitCloudProvider_NodeGroupForNode(t *testing.T) {
 
 		client.On("ListClusterNodes",
 			context.Background(),
-			goclient.Cursor{NoFilter: 1},
+			cloudbitgo.Cursor{NoFilter: 1},
 		).Return(
 			kubernetes.NodeList{
 				Items: []kubernetes.Node{
@@ -194,7 +193,7 @@ func TestCloudbitCloudProvider_NodeGroupForNode(t *testing.T) {
 
 		client.On("ListClusterNodes",
 			context.Background(),
-			goclient.Cursor{NoFilter: 1},
+			cloudbitgo.Cursor{NoFilter: 1},
 		).Return(
 			kubernetes.NodeList{
 				Items: []kubernetes.Node{

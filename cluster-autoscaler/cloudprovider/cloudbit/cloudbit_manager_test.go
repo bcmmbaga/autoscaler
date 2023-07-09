@@ -20,10 +20,9 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"github.com/flowswiss/goclient"
-	"github.com/flowswiss/goclient/kubernetes"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/autoscaler/cluster-autoscaler/cloudprovider"
+	"k8s.io/autoscaler/cluster-autoscaler/cloudprovider/cloudbit/cloudbit-sdk-go/kubernetes"
 	"testing"
 )
 
@@ -73,7 +72,7 @@ func TestCloudbitManager_Refresh(t *testing.T) {
 
 		client := &cloudbitClientMock{}
 		ctx := context.Background()
-		cursor := goclient.Cursor{NoFilter: 1}
+		cursor := cloudbitgo.Cursor{NoFilter: 1}
 
 		client.On("ListClusterNodes", ctx, cursor).Return(
 			kubernetes.NodeList{
@@ -120,7 +119,7 @@ func TestCloudbitManager_RefreshWithNodeSpec(t *testing.T) {
 
 		client := &cloudbitClientMock{}
 		ctx := context.Background()
-		cursor := goclient.Cursor{NoFilter: 1}
+		cursor := cloudbitgo.Cursor{NoFilter: 1}
 
 		client.On("ListClusterNodes", ctx, cursor).Return(
 			kubernetes.NodeList{

@@ -234,12 +234,6 @@ github.com/evanphx/json-patch
 # github.com/felixge/httpsnoop v1.0.3
 ## explicit; go 1.13
 github.com/felixge/httpsnoop
-# github.com/flowswiss/goclient v0.2.6
-## explicit; go 1.14
-github.com/flowswiss/goclient
-github.com/flowswiss/goclient/common
-github.com/flowswiss/goclient/compute
-github.com/flowswiss/goclient/kubernetes
 # github.com/fsnotify/fsnotify v1.6.0
 ## explicit; go 1.16
 github.com/fsnotify/fsnotify
