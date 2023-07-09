@@ -57,5 +57,5 @@ func (c *Client) UpdateCluster(ctx context.Context, clusterID int, req kubernete
 }
 
 func (c *Client) DeleteClusterNode(ctx context.Context, nodeID int) error {
-	return c.clusterService.Delete(ctx, nodeID)
+	return c.nodeService.Delete(ctx, nodeID)
 }

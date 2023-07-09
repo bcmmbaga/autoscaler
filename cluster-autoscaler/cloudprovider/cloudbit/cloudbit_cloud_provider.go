@@ -37,7 +37,7 @@ const (
 	// GPULabel is the label added to nodes with GPU resource.
 	GPULabel = "cloudbit.ch/gpu-node"
 
-	doProviderIDPrefix = "cloudbit://"
+	cloudbitProviderIDPrefix = "flow://"
 )
 
 // cloudbitCloudProvider implements CloudProvider interface.
@@ -167,7 +167,7 @@ func (d *cloudbitCloudProvider) Cleanup() error {
 // update cloud provider state. In particular the list of node groups returned
 // by NodeGroups() can change as a result of CloudProvider.Refresh().
 func (d *cloudbitCloudProvider) Refresh() error {
-	klog.V(4).Info("Refreshing node group cache")
+	klog.V(4).Info("refreshing node group cache")
 	return d.manager.Refresh()
 }
 
@@ -182,24 +182,24 @@ func BuildCloudbit(
 		var err error
 		configFile, err = os.Open(opts.CloudConfig)
 		if err != nil {
-			klog.Fatalf("Couldn't open cloud provider configuration %s: %#v", opts.CloudConfig, err)
+			klog.Fatalf("couldn't open cloud provider configuration %s: %#v", opts.CloudConfig, err)
 		}
 		defer func() {
 			err := configFile.Close()
 			if err == nil {
-				klog.Fatalf("Failed to close Civo cloud provider cloud config file: %v", err)
+				klog.Fatalf("failed to close Cloudbit cloud provider cloud config file: %v", err)
 			}
 		}()
 	}
 
 	manager, err := newManager(configFile, do)
 	if err != nil {
-		klog.Fatalf("Failed to create Cloudbit manager: %v", err)
+		klog.Fatalf("failed to create Cloudbit manager: %v", err)
 	}
 
 	provider, err := newCloudbitCloudProvider(manager, rl)
 	if err != nil {
-		klog.Fatalf("Failed to create Cloudbit cloud provider: %v", err)
+		klog.Fatalf("failed to create Cloudbit cloud provider: %v", err)
 	}
 
 	return provider
@@ -207,12 +207,12 @@ func BuildCloudbit(
 
 // toProviderID returns a provider ID from the given node ID.
 func toProviderID(nodeID int) string {
-	return fmt.Sprintf("%s%d", doProviderIDPrefix, nodeID)
+	return fmt.Sprintf("%s%d", cloudbitProviderIDPrefix, nodeID)
 }
 
 // toNodeID returns a node or instance ID from the given provider ID.
 func toNodeID(providerID string) (int, error) {
-	instanceID, err := strconv.Atoi(strings.TrimPrefix(providerID, doProviderIDPrefix))
+	instanceID, err := strconv.Atoi(strings.TrimPrefix(providerID, cloudbitProviderIDPrefix))
 	if err != nil {
 		return 0, err
 	}
