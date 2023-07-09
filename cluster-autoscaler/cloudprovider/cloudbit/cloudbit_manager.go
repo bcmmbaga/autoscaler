@@ -136,12 +136,20 @@ func (m *Manager) Refresh() error {
 		return fmt.Errorf("couldn't list Kubernetes cluster pools: %s", err)
 	}
 
+	var workerNodes []kubernetes.Node
+	for _, node := range nodeList.Items {
+		if isControlPlaneNode(node) {
+			continue
+		}
+		workerNodes = append(workerNodes, node)
+	}
+
 	var group []*NodeGroup
 	group = append(group, &NodeGroup{
 		id:        1,
 		clusterID: m.clusterID,
 		client:    m.client,
-		nodes:     nodeList.Items,
+		nodes:     workerNodes,
 		minSize:   minSize,
 		maxSize:   maxSize,
 	})
@@ -152,4 +160,13 @@ func (m *Manager) Refresh() error {
 
 	m.nodeGroups = group
 	return nil
+}
+
+func isControlPlaneNode(node kubernetes.Node) bool {
+	for _, role := range node.Roles {
+		if role.Key == "control-plane" {
+			return true
+		}
+	}
+	return false
 }
