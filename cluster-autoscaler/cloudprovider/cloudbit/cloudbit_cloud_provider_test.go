@@ -179,7 +179,7 @@ func TestCloudbitCloudProvider_NodeGroupForNode(t *testing.T) {
 		// let's get the nodeGroup for the node with ID 11
 		node := &apiv1.Node{
 			Spec: apiv1.NodeSpec{
-				ProviderID: "cloudbit://11",
+				ProviderID: "flow://11",
 			},
 		}
 
@@ -226,7 +226,7 @@ func TestCloudbitCloudProvider_NodeGroupForNode(t *testing.T) {
 		// let's get the nodeGroup for the node with ID 11
 		node := &apiv1.Node{
 			Spec: apiv1.NodeSpec{
-				ProviderID: "cloudbit://33",
+				ProviderID: "flow://33",
 			},
 		}
 

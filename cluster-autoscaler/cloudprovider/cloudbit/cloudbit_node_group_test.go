@@ -259,9 +259,9 @@ func TestNodeGroup_DeleteNodes(t *testing.T) {
 		ng := testNodeGroup(client, make([]kubernetes.Node, 3), 3, 10)
 
 		nodes := []*apiv1.Node{
-			{Spec: apiv1.NodeSpec{ProviderID: "cloudbit://1"}},
-			{Spec: apiv1.NodeSpec{ProviderID: "cloudbit://2"}},
-			{Spec: apiv1.NodeSpec{ProviderID: "cloudbit://3"}},
+			{Spec: apiv1.NodeSpec{ProviderID: "flow://1"}},
+			{Spec: apiv1.NodeSpec{ProviderID: "flow://2"}},
+			{Spec: apiv1.NodeSpec{ProviderID: "flow://3"}},
 		}
 
 		// this should be called three times (the number of nodes)
@@ -295,9 +295,9 @@ func TestNodeGroup_DeleteNodes(t *testing.T) {
 		ng := testNodeGroup(client, make([]kubernetes.Node, 3), 3, 10)
 
 		nodes := []*apiv1.Node{
-			{Spec: apiv1.NodeSpec{ProviderID: "cloudbit://1"}},
-			{Spec: apiv1.NodeSpec{ProviderID: "cloudbit://2"}},
-			{Spec: apiv1.NodeSpec{ProviderID: "cloudbit://3"}},
+			{Spec: apiv1.NodeSpec{ProviderID: "flow://1"}},
+			{Spec: apiv1.NodeSpec{ProviderID: "flow://2"}},
+			{Spec: apiv1.NodeSpec{ProviderID: "flow://3"}},
 		}
 
 		// this should be called three times (the number of nodes)
@@ -360,25 +360,25 @@ func TestNodeGroup_Nodes(t *testing.T) {
 
 		exp := []cloudprovider.Instance{
 			{
-				Id: "cloudbit://1",
+				Id: "flow://1",
 				Status: &cloudprovider.InstanceStatus{
 					State: cloudprovider.InstanceRunning,
 				},
 			},
 			{
-				Id: "cloudbit://2",
+				Id: "flow://2",
 				Status: &cloudprovider.InstanceStatus{
 					State: cloudprovider.InstanceCreating,
 				},
 			},
 			{
-				Id: "cloudbit://3",
+				Id: "flow://3",
 				Status: &cloudprovider.InstanceStatus{
 					State: cloudprovider.InstanceDeleting,
 				},
 			},
 			{
-				Id: "cloudbit://4",
+				Id: "flow://4",
 				Status: &cloudprovider.InstanceStatus{
 					ErrorInfo: &cloudprovider.InstanceErrorInfo{
 						ErrorClass:   cloudprovider.OtherErrorClass,
