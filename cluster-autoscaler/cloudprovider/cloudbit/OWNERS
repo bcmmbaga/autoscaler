@@ -1,0 +1,8 @@
+approvers:
+- bcmmbaga
+
+reviewers:
+- bcmmbaga
+
+labels:
+- area/provider/cloudbit
